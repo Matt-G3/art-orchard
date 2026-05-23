@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drawing App</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        #canvas {
+            border: 1px solid black;
+            touch-action: none;
+            display: block;
+            margin-top: 10px;
+        }
+
+        #saveButton {
+            padding: 6px 12px;
+            border: 1px solid black;
+            text-decoration: none;
+            color: black;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Pen color picker -->
+    <input type="color" id="penColor" value="#000000">
+
+    <!-- Pen thickness slider -->
+    <input type="range"
+           id="penSize"
+           min="1"
+           max="50"
+           value="4">
+
+    <!-- Save button -->
+    <a id="saveButton">Save</a>
+
+    <!-- Drawing canvas -->
+    <canvas id="canvas" width="600" height="400"></canvas>
+
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+
+        const penColor = document.getElementById("penColor");
+        const penSize = document.getElementById("penSize");
+        const saveButton = document.getElementById("saveButton");
+
+        let drawing = false;
+
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        canvas.addEventListener("pointerdown", function (event) {
+
+            drawing = true;
+
+            canvas.setPointerCapture(event.pointerId);
+
+            ctx.beginPath();
+            ctx.moveTo(event.offsetX, event.offsetY);
+        });
+
+        canvas.addEventListener("pointermove", function (event) {
+
+            if (!drawing) return;
+
+            ctx.strokeStyle = penColor.value;
+
+            ctx.lineWidth = penSize.value;
+
+            ctx.lineTo(event.offsetX, event.offsetY);
+
+            ctx.stroke();
+        });
+
+        canvas.addEventListener("pointerup", function (event) {
+
+            drawing = false;
+
+            canvas.releasePointerCapture(event.pointerId);
+        });
+
+        canvas.addEventListener("pointerleave", function () {
+
+            drawing = false;
+        });
+
+        canvas.addEventListener("pointercancel", function () {
+
+            drawing = false;
+        });
+
+        // Save drawing as PNG
+        saveButton.onclick = function () {
+
+            saveButton.href = canvas.toDataURL();
+
+            saveButton.download = "drawing.png";
+        };
+    </script>
+
+</body>
+
+</html>
