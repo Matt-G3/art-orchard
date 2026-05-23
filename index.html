@@ -28,7 +28,6 @@
             font-family: "Inter", system-ui, sans-serif;
             background: radial-gradient(circle at 20% 0%, #182f2f 0%, var(--bg) 60%);
             color: var(--text);
-            overflow-x: hidden;
         }
 
         .welcome {
@@ -77,14 +76,14 @@
 
         .track {
             height: 100%;
-            width: 300vw;
+            width: 300%;
             display: flex;
             transition: transform .08s linear;
             will-change: transform;
         }
 
         .panel {
-            width: 100vw;
+            flex: 0 0 33.3333%;
             height: 100vh;
             padding: clamp(1rem, 3vw, 2rem);
             overflow: auto;
