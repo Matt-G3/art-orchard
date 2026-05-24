@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            padding: 20px;
         }
 
         #canvas {
@@ -21,6 +23,7 @@
             padding: 6px 12px;
             border: 1px solid black;
             background: white;
+            color: black;
             cursor: pointer;
             margin-left: 10px;
         }
@@ -33,20 +36,22 @@
 
     <input type="range" id="penSize" min="1" max="50" value="4">
 
-    <button id="saveButton">Upload</button>
+    <button id="saveButton">Save</button>
 
     <canvas id="canvas" width="600" height="400"></canvas>
 
-    <p id="status"></p>
-
     <script>
+        const API = "https://Matthew2007.pythonanywhere.com";
+
         const canvas = document.getElementById("canvas");
         const ctx = canvas.getContext("2d");
 
         const penColor = document.getElementById("penColor");
         const penSize = document.getElementById("penSize");
         const saveButton = document.getElementById("saveButton");
-        const statusText = document.getElementById("status");
+
+        const params = new URLSearchParams(window.location.search);
+        const parentId = params.get("parent_id");
 
         let drawing = false;
 
@@ -85,54 +90,34 @@
         });
 
         saveButton.onclick = function () {
-            statusText.textContent = "Uploading...";
-
             canvas.toBlob(async function (blob) {
                 const formData = new FormData();
                 formData.append("image", blob, "drawing.png");
 
-                /*
-                   If this drawing has a parent, use:
-                   ?parent=IMAGE_ID
+                const uploadUrl = parentId
+                    ? `${API}/upload_image/${parentId}`
+                    : `${API}/upload_image`;
 
-                   Example:
-                   drawing.html?parent=abc123
-                */
-                const params = new URLSearchParams(window.location.search);
-                const parentId = params.get("parent");
+                const response = await fetch(uploadUrl, {
+                    method: "POST",
+                    body: formData
+                });
 
-                let uploadUrl;
+                const result = await response.json();
+
+                console.log(result);
+
+                alert("Image uploaded!");
 
                 if (parentId) {
-                    uploadUrl = `https://Matthew2007.pythonanywhere.com/upload_image/${parentId}`;
+                    window.location.href = `branch-view.html?id=${parentId}`;
                 } else {
-                    uploadUrl = `https://Matthew2007.pythonanywhere.com/upload_image`;
-                }
-
-                try {
-                    const response = await fetch(uploadUrl, {
-                        method: "POST",
-                        body: formData
-                    });
-
-                    const result = await response.json();
-
-                    if (!response.ok) {
-                        statusText.textContent = "Upload failed.";
-                        console.log(result);
-                        return;
-                    }
-
-                    statusText.textContent = "Uploaded! Image ID: " + result.id;
-                    console.log(result);
-
-                } catch (error) {
-                    statusText.textContent = "Upload error.";
-                    console.error(error);
+                    window.location.href = "branches.html";
                 }
             }, "image/png");
         };
     </script>
 
 </body>
+
 </html>

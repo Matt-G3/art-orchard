@@ -1,33 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Branch View</title>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-
-        img {
-            max-width: 300px;
-            border: 1px solid black;
-            margin: 10px;
-        }
-
-        .imageRow {
-            display: flex;
-            gap: 15px;
-            overflow-x: auto;
-        }
-    </style>
-</head>
-
 <body>
 
     <h1>Selected Image</h1>
     <div id="selectedImage"></div>
+
+    <button id="makeChildButton">Make child image</button>
 
     <h2>Children</h2>
     <div id="children" class="imageRow"></div>
@@ -40,26 +16,40 @@
 
         const selectedImage = document.getElementById("selectedImage");
         const children = document.getElementById("children");
+        const makeChildButton = document.getElementById("makeChildButton");
 
-        const img = document.createElement("img");
-        img.src = `${API}/get-image/${imageId}`;
-        selectedImage.appendChild(img);
+        if (!imageId) {
+            selectedImage.innerHTML = "<p>No image selected.</p>";
+            makeChildButton.style.display = "none";
+        } else {
+            const img = document.createElement("img");
+            img.src = `${API}/get-image/${imageId}`;
+            selectedImage.appendChild(img);
 
-        fetch(`${API}/images/${imageId}`)
-            .then(response => response.json())
-            .then(data => {
-                data.images.forEach(child => {
-                    const link = document.createElement("a");
-                    link.href = `branch-view.html?id=${child.id}`;
+            makeChildButton.onclick = function () {
+                window.location.href = `drawing.html?parent_id=${imageId}`;
+            };
 
-                    const childImg = document.createElement("img");
-                    childImg.src = `${API}${child.url}`;
+            fetch(`${API}/images/${imageId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.images.length === 0) {
+                        children.innerHTML = "<p>No children yet.</p>";
+                        return;
+                    }
 
-                    link.appendChild(childImg);
-                    children.appendChild(link);
+                    data.images.forEach(child => {
+                        const link = document.createElement("a");
+                        link.href = `branch-view.html?id=${child.id}`;
+
+                        const childImg = document.createElement("img");
+                        childImg.src = `${API}${child.url}`;
+
+                        link.appendChild(childImg);
+                        children.appendChild(link);
+                    });
                 });
-            });
+        }
     </script>
 
 </body>
-</html>
