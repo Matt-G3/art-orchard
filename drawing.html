@@ -88,34 +88,40 @@
         canvas.addEventListener("pointercancel", function () {
             drawing = false;
         });
+            saveButton.onclick = function () {
+                canvas.toBlob(async function (blob) {
+                    const formData = new FormData();
+                    formData.append("image", blob, "drawing.png");
 
-        saveButton.onclick = function () {
-            canvas.toBlob(async function (blob) {
-                const formData = new FormData();
-                formData.append("image", blob, "drawing.png");
+                    const uploadUrl = parentId
+                        ? `${API}/upload_image/${parentId}`
+                        : `${API}/upload_image`;
 
-                const uploadUrl = parentId
-                    ? `${API}/upload_image/${parentId}`
-                    : `${API}/upload_image`;
+                    try {
+                        const response = await fetch(uploadUrl, {
+                            method: "POST",
+                            body: formData
+                        });
 
-                const response = await fetch(uploadUrl, {
-                    method: "POST",
-                    body: formData
-                });
+                        const result = await response.json();
 
-                const result = await response.json();
+                        if (!response.ok) {
+                            alert("Upload failed");
+                            console.log(result);
+                            return;
+                        }
 
-                console.log(result);
+                        alert("Image uploaded!");
 
-                alert("Image uploaded!");
+                        // Go to the NEW image's branch page
+                        window.location.href = `branch-view.html?id=${result.id}`;
 
-                if (parentId) {
-                    window.location.href = `branch-view.html?id=${parentId}`;
-                } else {
-                    window.location.href = "branches.html";
-                }
-            }, "image/png");
-        };
+                    } catch (error) {
+                        console.error("Upload error:", error);
+                        alert("Upload error. Check console.");
+                    }
+                }, "image/png");
+            };    
     </script>
 
 </body>
