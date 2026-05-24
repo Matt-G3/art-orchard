@@ -51,23 +51,29 @@ def get_images_for_parent(parent_id):
         "images": children
     }), 200
 
+@app.route('/base-images', methods=['GET'])
+def get_base_images():
+    return jsonify({
+        "base_images": db.get("__base__", [])
+    }), 200
 
+@app.route('/upload_image', methods=['POST'])
 @app.route('/upload_image/<parent_id>', methods=['POST'])
-def upload_image(parent_id):
+def upload_image(parent_id=None):
     if 'image' not in request.files:
         return "No file part", 400
-
     imageFile = request.files['image']
     if imageFile.filename == '':
         return 'No selected file', 400
-
     if imageFile:
         image_id = str(uuid.uuid4())
         filename = f"{image_id}.png"
         path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         imageFile.save(path)
 
-        # Add image to parent's list
+        if parent_id is None:
+            parent_id = "__base__"
+
         if parent_id not in db:
             db[parent_id] = []
         db[parent_id].append({
@@ -75,7 +81,6 @@ def upload_image(parent_id):
             "url": f"/get-image/{image_id}"
         })
         save_data(db)
-
         return jsonify({
             "message": "File successfully uploaded!",
             "id": image_id,
@@ -83,7 +88,6 @@ def upload_image(parent_id):
             "parent_id": parent_id,
             "total_images": len(db[parent_id])
         }), 200
-
     return "File not uploaded", 400
 
 @app.route('/delete_image/<parent_id>/<image_id>', methods=['DELETE'])
@@ -104,6 +108,8 @@ def delete_image(parent_id, image_id):
 
     save_data(db)
     return jsonify({"message": "Image deleted", "remaining": len(db[parent_id])}), 200
+
+
 
 @app.route('/test')
 def test():
