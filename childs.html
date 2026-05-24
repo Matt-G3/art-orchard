@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Branch View</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        img {
+            max-width: 300px;
+            border: 1px solid black;
+            margin: 10px;
+        }
+
+        .imageRow {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Selected Image</h1>
+    <div id="selectedImage"></div>
+
+    <h2>Children</h2>
+    <div id="children" class="imageRow"></div>
+
+    <script>
+        const API = "https://Matthew2007.pythonanywhere.com";
+
+        const params = new URLSearchParams(window.location.search);
+        const imageId = params.get("id");
+
+        const selectedImage = document.getElementById("selectedImage");
+        const children = document.getElementById("children");
+
+        const img = document.createElement("img");
+        img.src = `${API}/get-image/${imageId}`;
+        selectedImage.appendChild(img);
+
+        fetch(`${API}/images/${imageId}`)
+            .then(response => response.json())
+            .then(data => {
+                data.images.forEach(child => {
+                    const link = document.createElement("a");
+                    link.href = `branch-view.html?id=${child.id}`;
+
+                    const childImg = document.createElement("img");
+                    childImg.src = `${API}${child.url}`;
+
+                    link.appendChild(childImg);
+                    children.appendChild(link);
+                });
+            });
+    </script>
+
+</body>
+</html>

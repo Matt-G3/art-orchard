@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,8 +20,8 @@
         #saveButton {
             padding: 6px 12px;
             border: 1px solid black;
-            text-decoration: none;
-            color: black;
+            background: white;
+            cursor: pointer;
             margin-left: 10px;
         }
     </style>
@@ -30,21 +29,15 @@
 
 <body>
 
-    <!-- Pen color picker -->
     <input type="color" id="penColor" value="#000000">
 
-    <!-- Pen thickness slider -->
-    <input type="range"
-           id="penSize"
-           min="1"
-           max="50"
-           value="4">
+    <input type="range" id="penSize" min="1" max="50" value="4">
 
-    <!-- Save button -->
-    <a id="saveButton">Save</a>
+    <button id="saveButton">Upload</button>
 
-    <!-- Drawing canvas -->
     <canvas id="canvas" width="600" height="400"></canvas>
+
+    <p id="status"></p>
 
     <script>
         const canvas = document.getElementById("canvas");
@@ -53,6 +46,7 @@
         const penColor = document.getElementById("penColor");
         const penSize = document.getElementById("penSize");
         const saveButton = document.getElementById("saveButton");
+        const statusText = document.getElementById("status");
 
         let drawing = false;
 
@@ -60,9 +54,7 @@
         ctx.lineJoin = "round";
 
         canvas.addEventListener("pointerdown", function (event) {
-
             drawing = true;
-
             canvas.setPointerCapture(event.pointerId);
 
             ctx.beginPath();
@@ -70,61 +62,77 @@
         });
 
         canvas.addEventListener("pointermove", function (event) {
-
             if (!drawing) return;
 
             ctx.strokeStyle = penColor.value;
-
             ctx.lineWidth = penSize.value;
 
             ctx.lineTo(event.offsetX, event.offsetY);
-
             ctx.stroke();
         });
 
         canvas.addEventListener("pointerup", function (event) {
-
             drawing = false;
-
             canvas.releasePointerCapture(event.pointerId);
         });
 
         canvas.addEventListener("pointerleave", function () {
-
             drawing = false;
         });
 
         canvas.addEventListener("pointercancel", function () {
-
             drawing = false;
         });
 
-        saveButton.onclick = async function () {
-            // Convert canvas to blob
-            canvas.toBlob(async function(blob) {
+        saveButton.onclick = function () {
+            statusText.textContent = "Uploading...";
 
+            canvas.toBlob(async function (blob) {
                 const formData = new FormData();
-
                 formData.append("image", blob, "drawing.png");
 
-                // Replace ROOT with your parent image ID
-                const response = await fetch(
-                    "https://Matthew2007.pythonanywhere.com/upload_image/ROOT",
-                    {
+                /*
+                   If this drawing has a parent, use:
+                   ?parent=IMAGE_ID
+
+                   Example:
+                   drawing.html?parent=abc123
+                */
+                const params = new URLSearchParams(window.location.search);
+                const parentId = params.get("parent");
+
+                let uploadUrl;
+
+                if (parentId) {
+                    uploadUrl = `https://Matthew2007.pythonanywhere.com/upload_image/${parentId}`;
+                } else {
+                    uploadUrl = `https://Matthew2007.pythonanywhere.com/upload_image`;
+                }
+
+                try {
+                    const response = await fetch(uploadUrl, {
                         method: "POST",
                         body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (!response.ok) {
+                        statusText.textContent = "Upload failed.";
+                        console.log(result);
+                        return;
                     }
-                );
 
-                const result = await response.json();
+                    statusText.textContent = "Uploaded! Image ID: " + result.id;
+                    console.log(result);
 
-                console.log(result);
-
-                alert("Image uploaded!");
-            });
+                } catch (error) {
+                    statusText.textContent = "Upload error.";
+                    console.error(error);
+                }
+            }, "image/png");
         };
     </script>
 
 </body>
-
 </html>
