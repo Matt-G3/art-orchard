@@ -1,11 +1,131 @@
 <body>
 
-    <h1>Selected Image</h1>
-    <div id="selectedImage"></div>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-    <button id="makeChildButton">Make branch image</button>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            padding: 50px;
+            font-family: Arial, sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(255,255,255,0.8), transparent 35%),
+                linear-gradient(180deg, #f7f4ed 0%, #e7e0d3 100%);
+            color: #222;
+        }
+
+        h1 {
+            margin: 0 0 25px;
+            font-size: 54px;
+            letter-spacing: -2px;
+        }
+
+        h2 {
+            margin-top: 50px;
+            font-size: 34px;
+            letter-spacing: -1px;
+        }
+
+        .selectedCard {
+            width: fit-content;
+            padding: 24px;
+            border-radius: 28px;
+            background: rgba(255,255,255,0.68);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 18px 45px rgba(0,0,0,0.12);
+        }
+
+        #selectedImage img {
+            width: 520px;
+            max-width: 100%;
+            max-height: 420px;
+            object-fit: contain;
+            display: block;
+            border-radius: 22px;
+            background: white;
+            padding: 18px;
+            border: 1px solid rgba(0,0,0,0.08);
+        }
+
+        #makeChildButton {
+            margin-top: 24px;
+            padding: 16px 26px;
+            border: none;
+            border-radius: 999px;
+            background: #222;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+
+        #makeChildButton:hover {
+            transform: translateY(-3px);
+            background: black;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.18);
+        }
+
+        .imageRow {
+            display: flex;
+            gap: 22px;
+            overflow-x: auto;
+            padding: 25px;
+            border-radius: 24px;
+            background: rgba(255,255,255,0.62);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.08);
+        }
+
+        .imageRow::-webkit-scrollbar {
+            height: 10px;
+        }
+
+        .imageRow::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.2);
+            border-radius: 999px;
+        }
+
+        .imageRow a {
+            flex-shrink: 0;
+            display: block;
+            border-radius: 20px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .imageRow a:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        }
+
+        .imageRow img {
+            width: 240px;
+            height: 170px;
+            object-fit: contain;
+            display: block;
+            border-radius: 20px;
+            background: white;
+            padding: 12px;
+            border: 1px solid rgba(0,0,0,0.08);
+        }
+
+        .empty {
+            font-size: 18px;
+            opacity: 0.6;
+        }
+    </style>
+
+    <h1>Selected Image</h1>
+
+    <div class="selectedCard">
+        <div id="selectedImage"></div>
+        <button id="makeChildButton">Make Branch Image</button>
+    </div>
 
     <h2>Branches</h2>
+
     <div id="children" class="imageRow"></div>
 
     <script>
@@ -19,7 +139,7 @@
         const makeChildButton = document.getElementById("makeChildButton");
 
         if (!imageId) {
-            selectedImage.innerHTML = "<p>No image selected.</p>";
+            selectedImage.innerHTML = "<p class='empty'>No image selected.</p>";
             makeChildButton.style.display = "none";
         } else {
             const img = document.createElement("img");
@@ -34,7 +154,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.images.length === 0) {
-                        children.innerHTML = "<p>No children yet.</p>";
+                        children.innerHTML = "<p class='empty'>No branches yet.</p>";
                         return;
                     }
 

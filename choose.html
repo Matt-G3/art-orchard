@@ -1,12 +1,133 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <a href="drawing.html">
-            <button> Start a new drawing </button> <br><br><br>
-        </a>
-        <a href="branches.html">
-            <button> view branches </button>
-        </a>
-    </head>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Art Orchard</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+
+            min-height: 100vh;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            font-family: Arial, sans-serif;
+
+            background: linear-gradient(
+                180deg,
+                #f7f4ed 0%,
+                #ece7dc 100%
+            );
+        }
+
+        .container {
+            text-align: center;
+
+            padding: 50px;
+
+            border-radius: 28px;
+
+            background: rgba(255,255,255,0.65);
+
+            backdrop-filter: blur(10px);
+
+            box-shadow:
+                0 18px 50px rgba(0,0,0,0.12);
+        }
+
+        h1 {
+            margin-top: 0;
+
+            margin-bottom: 40px;
+
+            font-size: 54px;
+
+            letter-spacing: -2px;
+
+            color: #222;
+        }
+
+        .buttonColumn {
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 20px;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        button {
+            width: 320px;
+
+            padding: 18px 24px;
+
+            border: none;
+
+            border-radius: 18px;
+
+            background: #222;
+
+            color: white;
+
+            font-size: 18px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease,
+                background 0.2s ease;
+        }
+
+        button:hover {
+            transform: translateY(-4px);
+
+            background: #111;
+
+            box-shadow:
+                0 12px 25px rgba(0,0,0,0.2);
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>Art Orchard</h1>
+
+        <div class="buttonColumn">
+
+            <a href="drawing.html">
+                <button>Start a New Drawing</button>
+            </a>
+
+            <a href="branches.html">
+                <button>View Branches</button>
+            </a>
+
+        </div>
+
+    </div>
+
+</body>
 
 </html>

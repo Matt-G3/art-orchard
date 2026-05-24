@@ -4,39 +4,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drawing App</title>
+    <title>Draw - Art Orchard</title>
 
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
+        * {
+            box-sizing: border-box;
         }
 
-        #canvas {
-            border: 1px solid black;
-            touch-action: none;
-            display: block;
-            margin-top: 10px;
+        body {
+            margin: 0;
+            min-height: 100vh;
+            padding: 40px;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(180deg, #f7f4ed 0%, #ece7dc 100%);
+            color: #222;
+        }
+
+        h1 {
+            margin: 0 0 24px;
+            font-size: 42px;
+            letter-spacing: -1px;
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 18px;
+            width: fit-content;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.65);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        input[type="color"] {
+            width: 46px;
+            height: 46px;
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
+
+        input[type="range"] {
+            width: 180px;
         }
 
         #saveButton {
-            padding: 6px 12px;
-            border: 1px solid black;
-            background: white;
-            color: black;
+            padding: 12px 20px;
+            border: 1px solid rgba(0,0,0,0.12);
+            border-radius: 999px;
+            background: #222;
+            color: white;
             cursor: pointer;
-            margin-left: 10px;
+            font-weight: bold;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        #saveButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+        }
+
+        #canvas {
+            display: block;
+            width: 600px;
+            height: 400px;
+            border-radius: 22px;
+            border: 1px solid rgba(0,0,0,0.12);
+            background: white;
+            touch-action: none;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.12);
         }
     </style>
 </head>
 
 <body>
 
-    <input type="color" id="penColor" value="#000000">
+    <h1>Draw Something</h1>
 
-    <input type="range" id="penSize" min="1" max="50" value="4">
+    <div class="toolbar">
+        <input type="color" id="penColor" value="#000000">
 
-    <button id="saveButton">Save</button>
+        <input type="range" id="penSize" min="1" max="50" value="4">
+
+        <button id="saveButton">Save</button>
+    </div>
 
     <canvas id="canvas" width="600" height="400"></canvas>
 
@@ -88,40 +141,38 @@
         canvas.addEventListener("pointercancel", function () {
             drawing = false;
         });
-            saveButton.onclick = function () {
-                canvas.toBlob(async function (blob) {
-                    const formData = new FormData();
-                    formData.append("image", blob, "drawing.png");
 
-                    const uploadUrl = parentId
-                        ? `${API}/upload_image/${parentId}`
-                        : `${API}/upload_image`;
+        saveButton.onclick = function () {
+            canvas.toBlob(async function (blob) {
+                const formData = new FormData();
+                formData.append("image", blob, "drawing.png");
 
-                    try {
-                        const response = await fetch(uploadUrl, {
-                            method: "POST",
-                            body: formData
-                        });
+                const uploadUrl = parentId
+                    ? `${API}/upload_image/${parentId}`
+                    : `${API}/upload_image`;
 
-                        const result = await response.json();
+                try {
+                    const response = await fetch(uploadUrl, {
+                        method: "POST",
+                        body: formData
+                    });
 
-                        if (!response.ok) {
-                            alert("Upload failed");
-                            console.log(result);
-                            return;
-                        }
+                    const result = await response.json();
 
-                        alert("Image uploaded!");
-
-                        // Go to the NEW image's branch page
-                        window.location.href = "choose.html";
-
-                    } catch (error) {
-                        console.error("Upload error:", error);
-                        alert("Upload error. Check console.");
+                    if (!response.ok) {
+                        alert("Upload failed");
+                        console.log(result);
+                        return;
                     }
-                }, "image/png");
-            };    
+
+                    window.location.href = "choose.html";
+
+                } catch (error) {
+                    console.error("Upload error:", error);
+                    alert("Upload error. Check console.");
+                }
+            }, "image/png");
+        };
     </script>
 
 </body>
