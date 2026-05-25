@@ -1,4 +1,8 @@
-<body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Branch Tree</title>
 
     <style>
         * {
@@ -10,105 +14,120 @@
             min-height: 100vh;
             padding: 50px;
             font-family: Arial, sans-serif;
-            background:
-                radial-gradient(circle at top left, rgba(255,255,255,0.8), transparent 35%),
-                linear-gradient(180deg, #f7f4ed 0%, #e7e0d3 100%);
+
+            background-image:
+                linear-gradient(
+                    rgba(255,255,255,0.65),
+                    rgba(255,255,255,0.75)
+                ),
+                url("background.png");
+
+            background-size: cover;
+
+            background-position: center;
+
+            background-repeat: no-repeat;
+
+            background-attachment: fixed;
+
             color: #222;
         }
 
         h1 {
-            margin: 0 0 25px;
             font-size: 54px;
-            letter-spacing: -2px;
-        }
-
-        h2 {
-            margin-top: 50px;
-            font-size: 34px;
-            letter-spacing: -1px;
-        }
-
-        .selectedCard {
-            width: fit-content;
-            padding: 24px;
-            border-radius: 28px;
-            background: rgba(255,255,255,0.68);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 18px 45px rgba(0,0,0,0.12);
-        }
-
-        #selectedImage img {
-            width: 520px;
-            max-width: 100%;
-            max-height: 420px;
-            object-fit: contain;
-            display: block;
-            border-radius: 22px;
-            background: white;
-            padding: 18px;
-            border: 1px solid rgba(0,0,0,0.08);
         }
 
         #makeChildButton {
-            margin-top: 24px;
+            margin-bottom: 40px;
             padding: 16px 26px;
             border: none;
             border-radius: 999px;
             background: #222;
             color: white;
-            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
         }
 
-        #makeChildButton:hover {
-            transform: translateY(-3px);
-            background: black;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.18);
-        }
-
-        .imageRow {
-            display: flex;
-            gap: 22px;
+        .treeWrapper {
             overflow-x: auto;
-            padding: 25px;
-            border-radius: 24px;
+            padding: 50px;
+            border-radius: 28px;
             background: rgba(255,255,255,0.62);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 12px 35px rgba(0,0,0,0.08);
+            box-shadow: 0 18px 45px rgba(0,0,0,0.1);
         }
 
-        .imageRow::-webkit-scrollbar {
-            height: 10px;
+        .tree {
+            display: flex;
+            justify-content: center;
+            min-width: max-content;
         }
 
-        .imageRow::-webkit-scrollbar-thumb {
-            background: rgba(0,0,0,0.2);
-            border-radius: 999px;
+        .node {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 20px;
         }
 
-        .imageRow a {
-            flex-shrink: 0;
-            display: block;
-            border-radius: 20px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        .nodeCard {
+            width: 230px;
+            border-radius: 24px;
+            background: white;
+            padding: 14px;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+            cursor: pointer;
+            z-index: 2;
         }
 
-        .imageRow a:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
-        }
-
-        .imageRow img {
-            width: 240px;
-            height: 170px;
+        .nodeCard img {
+            width: 100%;
+            height: 160px;
             object-fit: contain;
             display: block;
-            border-radius: 20px;
+            border-radius: 18px;
             background: white;
-            padding: 12px;
-            border: 1px solid rgba(0,0,0,0.08);
+        }
+
+        .connectorArea {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .verticalConnector {
+            width: 70px;
+            height: 110px;
+            object-fit: fill;
+        }
+
+        .horizontalConnector {
+            width: 100%;
+            height: 70px;
+            object-fit: fill;
+            margin-top: -20px;
+            margin-bottom: -10px;
+        }
+
+        .children {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 120px;
+        }
+
+        .childWrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .sideConnector {
+            width: 190px;
+            height: 130px;
+            object-fit: fill;
+            margin-bottom: -45px;
         }
 
         .empty {
@@ -116,60 +135,148 @@
             opacity: 0.6;
         }
     </style>
+</head>
 
-    <h1>Selected Image</h1>
+<body>
 
-    <div class="selectedCard">
-        <div id="selectedImage"></div>
-        <button id="makeChildButton">Make Branch Image</button>
+    <h1>Branch Tree</h1>
+
+    <button id="makeChildButton">Make Branch Image</button>
+
+    <div class="treeWrapper">
+        <div id="tree" class="tree">
+            <p class="empty">Loading tree...</p>
+        </div>
     </div>
-
-    <h2>Branches</h2>
-
-    <div id="children" class="imageRow"></div>
 
     <script>
         const API = "https://Matthew2007.pythonanywhere.com";
 
+        const LINE_DOWN = "line-down.png";
+        const LINE_LEFT = "line-left.png";
+        const LINE_RIGHT = "line-right.png";
+        const LINE_HORIZONTAL = "line-horizontal.png";
+
         const params = new URLSearchParams(window.location.search);
         const imageId = params.get("id");
 
-        const selectedImage = document.getElementById("selectedImage");
-        const children = document.getElementById("children");
+        const tree = document.getElementById("tree");
         const makeChildButton = document.getElementById("makeChildButton");
 
         if (!imageId) {
-            selectedImage.innerHTML = "<p class='empty'>No image selected.</p>";
+            tree.innerHTML = "<p class='empty'>No image selected.</p>";
             makeChildButton.style.display = "none";
         } else {
-            const img = document.createElement("img");
-            img.src = `${API}/get-image/${imageId}`;
-            selectedImage.appendChild(img);
-
             makeChildButton.onclick = function () {
                 window.location.href = `drawing.html?parent_id=${imageId}`;
             };
 
-            fetch(`${API}/images/${imageId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.images.length === 0) {
-                        children.innerHTML = "<p class='empty'>No branches yet.</p>";
-                        return;
-                    }
+            loadTree();
+        }
 
-                    data.images.forEach(child => {
-                        const link = document.createElement("a");
-                        link.href = `branch-view.html?id=${child.id}`;
+        async function getChildren(id) {
+            const response = await fetch(`${API}/images/${id}`);
+            const data = await response.json();
+            return data.images;
+        }
 
-                        const childImg = document.createElement("img");
-                        childImg.src = `${API}${child.url}`;
+        function getConnectorImage(index, total) {
+            const center = Math.floor(total / 2);
 
-                        link.appendChild(childImg);
-                        children.appendChild(link);
-                    });
-                });
+            if (total === 1) {
+                return LINE_DOWN;
+            }
+
+            if (index === center) {
+                return LINE_DOWN;
+            }
+
+            if (index < center) {
+                return LINE_LEFT;
+            }
+
+            return LINE_RIGHT;
+        }
+
+        async function createNode(image) {
+            const node = document.createElement("div");
+            node.className = "node";
+
+            const card = document.createElement("div");
+            card.className = "nodeCard";
+
+            card.onclick = function () {
+                window.location.href = `childs.html?id=${image.id}`;
+            };
+
+            const img = document.createElement("img");
+
+            img.src = image.url.startsWith("/get-image/")
+                ? `${API}${image.url}`
+                : `${API}/get-image/${image.id}`;
+
+            card.appendChild(img);
+            node.appendChild(card);
+
+            const childImages = await getChildren(image.id);
+
+            if (childImages.length > 0) {
+                const connectorArea = document.createElement("div");
+                connectorArea.className = "connectorArea";
+
+                const vertical = document.createElement("img");
+                vertical.className = "verticalConnector";
+                vertical.src = LINE_DOWN;
+
+                connectorArea.appendChild(vertical);
+
+                const childrenDiv = document.createElement("div");
+                childrenDiv.className = "children";
+
+                for (let i = 0; i < childImages.length; i++) {
+                    const child = childImages[i];
+
+                    const childWrapper = document.createElement("div");
+                    childWrapper.className = "childWrapper";
+
+                    const connector = document.createElement("img");
+                    connector.className = "sideConnector";
+                    connector.src = getConnectorImage(i, childImages.length);
+
+                    const childNode = await createNode(child);
+
+                    childWrapper.appendChild(connector);
+                    childWrapper.appendChild(childNode);
+
+                    childrenDiv.appendChild(childWrapper);
+                }
+
+                if (childImages.length > 1) {
+                    const horizontal = document.createElement("img");
+                    horizontal.className = "horizontalConnector";
+                    horizontal.src = LINE_HORIZONTAL;
+                    connectorArea.appendChild(horizontal);
+                }
+
+                connectorArea.appendChild(childrenDiv);
+                node.appendChild(connectorArea);
+            }
+
+            return node;
+        }
+
+        async function loadTree() {
+            const rootImage = {
+                id: imageId,
+                url: `/get-image/${imageId}`
+            };
+
+            tree.innerHTML = "";
+
+            const rootNode = await createNode(rootImage);
+            tree.appendChild(rootNode);
         }
     </script>
 
 </body>
+</html>
